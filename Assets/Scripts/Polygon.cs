@@ -11,6 +11,9 @@ public class Polygon
         set { this.meshData = value; }
     }
 
+    private Material material;
+    public Material Material { get { return this.material; } }
+
     private Picture picture;
     public Picture Picture
     {
@@ -25,18 +28,54 @@ public class Polygon
         set { this.isLoadComplete = value; }
     }
 
+    /// <summary>
+    /// 虚無
+    /// </summary>
     public Polygon()
     {
         isLoadComplete = false;
     }
 
     /// <summary>
-    /// Pictureのデータから3Dに変換するクラス
+    /// 3つの頂点からPoygonを生成。
+    /// </summary>
+    /// <param name="shader">適用するShader</param>
+    public Polygon(Shader shader)
+    {
+        isLoadComplete = false;
+
+        material = new Material(shader);
+        material.color = Color.blue;
+
+        Vector3[] vertices = new Vector3[3] { Vector3.zero, Vector3.right, Vector3.up }; // Polygonの頂点
+        int[] triangles = new int[3] { 0, 2, 1 }; // Polygonの頂点を結ぶ順番
+        Vector3[] normals = new Vector3[3] { Vector3.back, Vector3.back, Vector3.back }; // Polygonの法線
+
+        meshData = new Mesh();
+        meshData.vertices = vertices;
+        meshData.triangles = triangles;
+        meshData.normals = normals;
+        meshData.RecalculateBounds();
+
+        isLoadComplete = true;
+    }
+
+    /// <summary>
+    /// 画像のデータからPolygonを生成。
+    /// 頂点数65535以降は表示されない(Unityの仕様)
     /// </summary>
     /// <param name="path">画像のPath</param>
+    /// <param name="shader">適用するShader</param>
     public Polygon(string path, Shader shader)
     {
-        picture = new Picture(path, shader);
+        isLoadComplete = false;
+
+        picture = new Picture(path);
+
+        // Materialの設定
+        material = new Material(shader);
+        material.mainTexture = picture.PictureTex2D;
+
         int width = picture.Width;
         int height = picture.Height;
 
@@ -104,10 +143,10 @@ public class Polygon
         }
 
         // trianglesTwoArray -> trianglesに変換
-        int fortriangles = surfaceAmount * 3;
-        int[] triangles = new int[fortriangles];
+        int forTriangles = surfaceAmount * 3;
+        int[] triangles = new int[forTriangles];
         counter = 0;
-        for (int c = 0; c < fortriangles; c += 3)
+        for (int c = 0; c < forTriangles; c += 3)
         {
             triangles[c] = trianglesTwoArray[counter, 0];
             triangles[c + 1] = trianglesTwoArray[counter, 1];
@@ -119,7 +158,7 @@ public class Polygon
         // Polygonの法線を設定
         for (counter = 0; counter < vertexAmount; counter++)
         {
-            normals[counter] = new Vector3(0, 0, -1);
+            normals[counter] = Vector3.back;
         }
 
         meshData = new Mesh();
@@ -154,5 +193,14 @@ public class Polygon
 
         meshData.vertices = vertices;
         meshData.RecalculateBounds();
+    }
+
+    /// <summary>
+    /// Polygonの頂点の座標を更新する。
+    /// </summary>
+    /// <param name="shader">適用するShader</param>
+    public void UpdateVertexPosition(Vector3[] vertices)
+    {
+        meshData.vertices = vertices;
     }
 }

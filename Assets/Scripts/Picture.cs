@@ -4,12 +4,10 @@ using UnityEngine;
 public class Picture
 {
     private Texture2D pictureTex2D;
-    private Material material;
+    public Texture2D PictureTex2D { get { return this.pictureTex2D; } }
 
     private int width;
     private int height;
-
-    public Material Material { get { return this.material; } }
     public int Width { get { return this.width; } }
     public int Height { get { return this.height; } }
 
@@ -22,7 +20,7 @@ public class Picture
     2:モノクロ画像のPath
     ※PathはAssets/Resources内限定
     */
-    public Picture(string path, Shader shader)
+    public Picture(string path)
     {
         FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
 
@@ -32,12 +30,8 @@ public class Picture
         // どちらかの画像が欠けていたら実行しない
         if (pictureTex2D != null)
         {
-            material = new Material(shader);
-
             width = pictureTex2D.width;
             height = pictureTex2D.height;
-
-            material.mainTexture = pictureTex2D;
         }
     }
 
